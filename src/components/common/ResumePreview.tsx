@@ -195,7 +195,8 @@ const ResumePreview: React.FC = () => {
                     {exp.jobTitle}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {exp.startDate} - {exp.currentlyWorking ? "Present" : exp.endDate}
+                    {exp.startDate} -{" "}
+                    {exp.currentlyWorking ? "Present" : exp.endDate}
                   </Typography>
                 </Box>
                 <Typography

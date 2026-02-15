@@ -47,7 +47,10 @@ const EducationForm: React.FC = () => {
     });
   };
 
-  const handleDateChange = (name: "startDate" | "endDate", date: Date | null) => {
+  const handleDateChange = (
+    name: "startDate" | "endDate",
+    date: Date | null,
+  ) => {
     setFormData({
       ...formData,
       [name]: date ? date.toISOString().split("T")[0] : "",

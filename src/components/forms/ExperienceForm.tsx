@@ -51,11 +51,17 @@ const ExperienceForm: React.FC = () => {
   };
 
   const handleStartDateChange = (date: Date | null) => {
-    setFormData({ ...formData, startDate: date ? date.toISOString().split("T")[0] : "" });
+    setFormData({
+      ...formData,
+      startDate: date ? date.toISOString().split("T")[0] : "",
+    });
   };
 
   const handleEndDateChange = (date: Date | null) => {
-    setFormData({ ...formData, endDate: date ? date.toISOString().split("T")[0] : "" });
+    setFormData({
+      ...formData,
+      endDate: date ? date.toISOString().split("T")[0] : "",
+    });
   };
 
   const handleAddOrUpdate = () => {
@@ -133,7 +139,9 @@ const ExperienceForm: React.FC = () => {
             label="Start Date"
             value={formData.startDate ? new Date(formData.startDate) : null}
             onChange={handleStartDateChange}
-            slotProps={{ textField: { fullWidth: true, InputLabelProps: { shrink: true } } }}
+            slotProps={{
+              textField: { fullWidth: true, InputLabelProps: { shrink: true } },
+            }}
           />
         </Grid>
 
@@ -143,7 +151,9 @@ const ExperienceForm: React.FC = () => {
             value={formData.endDate ? new Date(formData.endDate) : null}
             onChange={handleEndDateChange}
             disabled={formData.currentlyWorking}
-            slotProps={{ textField: { fullWidth: true, InputLabelProps: { shrink: true } } }}
+            slotProps={{
+              textField: { fullWidth: true, InputLabelProps: { shrink: true } },
+            }}
           />
         </Grid>
 
@@ -216,7 +226,8 @@ const ExperienceForm: React.FC = () => {
                       {exp.company}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {exp.startDate} - {exp.currentlyWorking ? "Present" : exp.endDate}
+                      {exp.startDate} -{" "}
+                      {exp.currentlyWorking ? "Present" : exp.endDate}
                     </Typography>
                     {exp.description && (
                       <Typography variant="body2" sx={{ mt: 1 }}>

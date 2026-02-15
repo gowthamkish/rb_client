@@ -1,5 +1,12 @@
 import React from "react";
-import { Box, Grid, Card, CardContent, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+} from "@mui/material";
 import { useResumeStore } from "../../store/resumeStore";
 
 const templates = [
@@ -27,7 +34,10 @@ const TemplateSelector: React.FC = () => {
                 <Typography variant="body2" sx={{ mb: 2 }}>
                   A quick preview of the {t.name} template.
                 </Typography>
-                <Button variant="outlined" onClick={() => setSelectedTemplate(t.id)}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setSelectedTemplate(t.id)}
+                >
                   Select
                 </Button>
               </CardContent>

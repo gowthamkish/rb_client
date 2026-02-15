@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -31,20 +31,14 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
+  const isAuthenticated = !!localStorage.getItem("token");
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isBuilderPage = location.pathname === "/builder";
 
-  useEffect(() => {
-    // Update authentication state when location changes
-    setIsAuthenticated(!!localStorage.getItem("token"));
-  }, [location]);
-
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setIsAuthenticated(false);
     navigate("/");
     setMobileOpen(false);
   };
@@ -194,7 +188,11 @@ const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
 
               {isAuthenticated ? (
                 <Tooltip title="Logout">
-                  <IconButton onClick={handleLogout} color="inherit" size="large">
+                  <IconButton
+                    onClick={handleLogout}
+                    color="inherit"
+                    size="large"
+                  >
                     <LogoutIcon />
                   </IconButton>
                 </Tooltip>
