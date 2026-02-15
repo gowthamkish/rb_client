@@ -1,0 +1,239 @@
+.landingPage {
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.heroSection {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 0;
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.heroStats {
+  display: flex;
+  gap: 3rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat strong {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.stat span {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.heroImage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heroVisual {
+  perspective: 1000px;
+}
+
+.resumeMockup {
+  background: white;
+  color: #2c3e50;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 350px;
+  transform: rotateY(-5deg) rotateX(2deg);
+  transition: transform 0.3s ease;
+}
+
+.resumeMockup:hover {
+  transform: rotateY(-3deg) rotateX(1deg);
+}
+
+.resumeHeader {
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.resumeName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.resumeTitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.resumeContent {
+  font-size: 0.85rem;
+}
+
+.resumeSection {
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.sectionItem {
+  color: #555;
+  margin-left: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Features Section */
+.featuresSection {
+  padding: 5rem 0;
+  background: #f8f9fa;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.sectionHeader h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.sectionHeader p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.featureCard {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.featureCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.featureIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Templates Section */
+.templatesSection {
+  padding: 5rem 0;
+  background: white;
+}
+
+.templateCard {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  height: 100%;
+  cursor: pointer;
+}
+
+.templateCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+/* CTA Section */
+.ctaSection {
+  padding: 5rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.ctaSection h2 {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.ctaSection p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+/* Footer */
+.footer {
+  padding: 2rem 0;
+  background: #f8f9fa;
+  text-align: center;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroStats {
+    gap: 1.5rem;
+  }
+
+  .stat strong {
+    font-size: 1.5rem;
+  }
+
+  .heroButtons {
+    flex-direction: column;
+  }
+
+  .heroButtons button {
+    width: 100%;
+  }
+
+  .sectionHeader h2 {
+    font-size: 2rem;
+  }
+
+  .ctaSection h2 {
+    font-size: 2rem;
+  }
+}

@@ -1,0 +1,185 @@
+.resumeBuilder {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.builderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.builderHeader h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  flex: 1;
+}
+
+.builderActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.builderContent {
+  gap: 2rem;
+}
+
+.formSection {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.builderTabs .navTabs {
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.builderTabs .navLink {
+  color: #666;
+  font-weight: 500;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.builderTabs .navLink:hover {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.builderTabs .navLinkActive {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  background: transparent;
+}
+
+.previewSection {
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+
+.previewSticky {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Form Styles */
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formLabel {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.formControl {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.formControl:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  outline: none;
+}
+
+.addButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.deleteButton {
+  background: #ff6b6b;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.deleteButton:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+}
+
+.itemCard {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+@media (max-width: 992px) {
+  .previewSection {
+    position: relative;
+    top: 0;
+  }
+
+  .previewSticky {
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .builderHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .builderHeader h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .builderActions {
+    justify-content: stretch;
+  }
+
+  .builderActions button {
+    flex: 1;
+  }
+
+  .formSection {
+    padding: 1rem;
+  }
+}

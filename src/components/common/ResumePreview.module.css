@@ -1,0 +1,131 @@
+.resumePreview {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 2rem;
+  font-family: 'Georgia', serif;
+}
+
+.previewHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 1rem;
+}
+
+.previewName {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.previewTitle {
+  font-size: 1rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.previewContact {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.previewSection {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.25rem;
+}
+
+.experienceItem,
+.educationItem {
+  margin-bottom: 1rem;
+}
+
+.itemTitle {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.itemSubtitle {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.itemDate {
+  color: #999;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.itemDescription {
+  margin-top: 0.5rem;
+  color: #555;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.skillsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skillChip {
+  background: #f5f5f5;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Template Variations */
+.modernTemplate .previewHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin: -2rem -2rem 1.5rem -2rem;
+  padding: 2rem;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+}
+
+.modernTemplate .previewName {
+  color: white;
+}
+
+.modernTemplate .previewTitle,
+.modernTemplate .previewContact {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.creativeTemplate {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.creativeTemplate .sectionTitle {
+  color: #764ba2;
+}
+
+.minimalTemplate .previewHeader {
+  border-bottom: 1px solid #333;
+}
+
+.minimalTemplate .sectionTitle {
+  color: #333;
+  border-bottom: none;
+}

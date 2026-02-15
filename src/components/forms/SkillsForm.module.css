@@ -1,0 +1,125 @@
+.skillsForm {
+  max-width: 100%;
+}
+
+.skillsList {
+  margin-bottom: 1.5rem;
+}
+
+.skillCard {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.skillCard:hover {
+  border-color: #667eea;
+  background: white;
+}
+
+.skillInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.skillName {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.skillProficiency {
+  font-size: 0.85rem;
+  color: #666;
+  background: #e0e0e0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+}
+
+.proficiencyBeginner {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.proficiencyIntermediate {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.proficiencyAdvanced {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.proficiencyExpert {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.addSkillForm {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.formGroup {
+  flex: 1;
+  min-width: 150px;
+}
+
+.addButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 40px;
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.deleteButton {
+  background: transparent;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.deleteButton:hover {
+  color: #ff5252;
+}
+
+@media (max-width: 768px) {
+  .addSkillForm {
+    flex-direction: column;
+  }
+
+  .formGroup {
+    width: 100%;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
