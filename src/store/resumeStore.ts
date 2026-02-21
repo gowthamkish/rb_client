@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface PersonalInfo {
   fullName: string;
@@ -42,14 +43,28 @@ export interface Resume {
   education: Education[];
   skills: Skill[];
   selectedTemplate: string;
+  templateSettings?: TemplateSettings;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TemplateSettings {
+  accentColor?: string;
+  headerBg?: string;
+  headerColor?: string;
+  sectionTitleColor?: string;
+  fontFamily?: string;
 }
 
 interface ResumeStore {
   resume: Resume | null;
   resumes: Resume[];
   setResume: (resume: Resume) => void;
+  saveDraft: () => void;
+  previewTemplate?: string | null;
+  setPreviewTemplate: (template: string | null) => void;
+  setTemplateSettings: (settings: Partial<TemplateSettings>) => void;
+  resetTemplateSettings: () => void;
   updatePersonalInfo: (info: PersonalInfo) => void;
   addExperience: (experience: Experience) => void;
   updateExperience: (id: string, experience: Experience) => void;
@@ -85,9 +100,31 @@ const initialResume: Resume = {
 
 export const useResumeStore = create<ResumeStore>((set) => ({
   resume: initialResume,
-  resumes: [],
+  resumes: typeof window !== 'undefined' && localStorage.getItem('resumes')
+    ? JSON.parse(localStorage.getItem('resumes') || '[]')
+    : [],
+  previewTemplate: null,
 
   setResume: (resume) => set({ resume }),
+  saveDraft: () =>
+    set((state) => {
+      if (!state.resume) return {} as Partial<ResumeStore>;
+      const now = new Date().toISOString();
+      const draft: Resume = {
+        ...state.resume,
+        id: state.resume.id || uuidv4(),
+        createdAt: state.resume.createdAt || now,
+        updatedAt: now,
+      };
+      const updatedResumes = [draft, ...state.resumes.filter((r) => r.id !== draft.id)];
+      try {
+        localStorage.setItem('resumes', JSON.stringify(updatedResumes));
+      } catch (err) {
+        // ignore storage errors
+        console.warn('Failed to persist drafts', err);
+      }
+      return { resume: draft, resumes: updatedResumes } as Partial<ResumeStore>;
+    }),
   setResumes: (resumes) => set({ resumes }),
 
   updatePersonalInfo: (info) =>
@@ -191,7 +228,21 @@ export const useResumeStore = create<ResumeStore>((set) => ({
 
   setSelectedTemplate: (template) =>
     set((state) => ({
-      resume: state.resume ? { ...state.resume, selectedTemplate: template } : null,
+      resume: state.resume
+        ? { ...state.resume, selectedTemplate: template }
+        : null,
+    })),
+
+  setTemplateSettings: (settings) =>
+    set((state) => ({
+      resume: state.resume ? { ...state.resume, templateSettings: { ...(state.resume.templateSettings || {}), ...settings } } : null,
+    })),
+
+  setPreviewTemplate: (template) => set(() => ({ previewTemplate: template })),
+
+  resetTemplateSettings: () =>
+    set((state) => ({
+      resume: state.resume ? { ...state.resume, templateSettings: undefined } : null,
     })),
 
   resetResume: () => set({ resume: initialResume }),

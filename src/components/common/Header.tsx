@@ -22,6 +22,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useResumeStore } from "../../store/resumeStore";
 
 interface HeaderProps {
   onSave?: () => void;
@@ -46,6 +47,13 @@ const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
   const handleSave = () => {
     if (onSave) {
       onSave();
+      return;
+    }
+
+    const saveDraft = useResumeStore.getState().saveDraft;
+    if (saveDraft) {
+      saveDraft();
+      toast.success("Draft saved locally");
     } else {
       toast.success("Resume saved successfully!");
     }

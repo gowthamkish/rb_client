@@ -7,6 +7,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 const ResumePreview: React.FC = () => {
   const resume = useResumeStore((state) => state.resume);
+  const previewTemplate = useResumeStore((s) => s.previewTemplate);
 
   if (!resume) return null;
 
@@ -51,11 +52,54 @@ const ResumePreview: React.FC = () => {
       accentColor: "#2c3e50",
       sectionTitleColor: "#2c3e50",
     },
+    sleek: {
+      headerBg: "linear-gradient(90deg, #0f172a 0%, #020617 100%)",
+      headerColor: "white",
+      accentColor: "#06b6d4",
+      sectionTitleColor: "#0f172a",
+    },
+    colorful: {
+      headerBg: "linear-gradient(135deg, #ff7eb3 0%, #65d6ff 100%)",
+      headerColor: "#111827",
+      accentColor: "#ff7eb3",
+      sectionTitleColor: "#111827",
+    },
+    timeline: {
+      headerBg: "#ffffff",
+      headerColor: "#111827",
+      accentColor: "#10b981",
+      sectionTitleColor: "#111827",
+    },
   };
 
+  const effectiveTemplate = previewTemplate || selectedTemplate;
+
   const currentStyle =
-    templateStyles[selectedTemplate as keyof typeof templateStyles] ||
+    templateStyles[effectiveTemplate as keyof typeof templateStyles] ||
     templateStyles.classic;
+
+  // Apply per-resume templateSettings overrides
+  const overrides =
+    (
+      resume as unknown as {
+        templateSettings?: {
+          accentColor?: string;
+          headerBg?: string;
+          headerColor?: string;
+          sectionTitleColor?: string;
+          fontFamily?: string;
+        };
+      }
+    ).templateSettings || {};
+  const styleWithOverrides = {
+    ...currentStyle,
+    ...(overrides.accentColor ? { accentColor: overrides.accentColor } : {}),
+    ...(overrides.headerBg ? { headerBg: overrides.headerBg } : {}),
+    ...(overrides.headerColor ? { headerColor: overrides.headerColor } : {}),
+    ...(overrides.sectionTitleColor
+      ? { sectionTitleColor: overrides.sectionTitleColor }
+      : {}),
+  };
 
   return (
     <Paper
@@ -66,14 +110,16 @@ const ResumePreview: React.FC = () => {
         minHeight: 800,
         overflow: "hidden",
         bgcolor: "white",
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: overrides.fontFamily
+          ? overrides.fontFamily
+          : '"Inter", sans-serif',
       }}
     >
       {/* Header */}
       <Box
         sx={{
-          background: currentStyle.headerBg,
-          color: currentStyle.headerColor,
+          background: styleWithOverrides.headerBg,
+          color: styleWithOverrides.headerColor,
           p: 4,
           textAlign:
             selectedTemplate === "minimal" || selectedTemplate === "ats"
