@@ -4,7 +4,6 @@ import {
   Container,
   Typography,
   Paper,
-  Grid,
   Button,
   Stepper,
   Step,
@@ -77,6 +76,10 @@ const CustomStepIconRoot = styled("div")<{
     backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
     opacity: 0.75,
   }),
+  // ensure child svg icons inherit a consistent size
+  "& svg": {
+    fontSize: 20,
+  },
 }));
 
 const STEP_ICONS: React.ReactElement[] = [
@@ -94,9 +97,7 @@ function CustomStepIcon(props: StepIconProps) {
       ownerState={{ completed, active }}
       className={className}
     >
-      {React.cloneElement(STEP_ICONS[(icon as number) - 1], {
-        sx: { fontSize: 20 },
-      })}
+      {STEP_ICONS[(icon as number) - 1]}
     </CustomStepIconRoot>
   );
 }
@@ -281,10 +282,10 @@ const ResumeBuilder: React.FC = () => {
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Grid container spacing={4}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
           {/* Preview Section */}
           {showPreview && (
-            <Grid size={{ xs: 12, lg: 6 }}>
+            <Box sx={{ width: { xs: "100%", lg: "48%" } }}>
               <Paper
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -340,11 +341,11 @@ const ResumeBuilder: React.FC = () => {
                   <ResumePreview />
                 </Box>
               </Paper>
-            </Grid>
+            </Box>
           )}
 
           {/* Form Section */}
-          <Grid size={{ xs: 12, lg: showPreview ? 6 : 12 }}>
+          <Box sx={{ width: { xs: "100%", lg: showPreview ? "48%" : "100%" } }}>
             <Paper sx={{ p: 3 }}>
               {/* ── Custom Horizontal Stepper ── */}
               <Stepper
@@ -431,8 +432,8 @@ const ResumeBuilder: React.FC = () => {
                 </Button>
               </Box>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );
