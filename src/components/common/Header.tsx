@@ -23,6 +23,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useResumeStore } from "../../store/resumeStore";
+import { resumeService } from "../../services/api";
 
 interface HeaderProps {
   onSave?: () => void;
@@ -50,13 +51,61 @@ const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
       return;
     }
 
-    const saveDraft = useResumeStore.getState().saveDraft;
-    if (saveDraft) {
-      saveDraft();
-      toast.success("Draft saved locally");
-    } else {
-      toast.success("Resume saved successfully!");
+    const token = localStorage.getItem("token");
+    const resume = useResumeStore.getState().resume;
+    const setResume = useResumeStore.getState().setResume;
+
+    if (!resume) {
+      toast.error("Nothing to save");
+      return;
     }
+
+    if (!token) {
+      // fallback to local save
+      const saveDraft = useResumeStore.getState().saveDraft;
+      if (saveDraft) {
+        saveDraft();
+        toast.success("Draft saved locally");
+        return;
+      }
+      toast.error("Not authenticated");
+      return;
+    }
+
+    (async () => {
+      try {
+        if (resume.id) {
+          const res = await resumeService.updateResume(
+            resume.id,
+            resume as any,
+          );
+          const updated = res.data?.resume || res.data;
+          if (updated)
+            setResume({
+              ...(resume as any),
+              id: updated._id || updated.id,
+              updatedAt: updated.updatedAt || resume.updatedAt,
+            });
+          toast.success("Resume updated on server");
+        } else {
+          const res = await resumeService.createResume(resume as any);
+          const created = res.data?.resume || res.data;
+          if (created)
+            setResume({
+              ...(resume as any),
+              id: created._id || created.id,
+              createdAt: created.createdAt,
+              updatedAt: created.updatedAt,
+            });
+          toast.success("Resume saved to server");
+        }
+      } catch (err: any) {
+        console.error(err);
+        toast.error(
+          err?.response?.data?.message || "Failed to save resume to server",
+        );
+      }
+    })();
   };
 
   const handleDownloadPDF = () => {

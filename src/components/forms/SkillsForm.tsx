@@ -11,6 +11,7 @@ import {
   Select,
   MenuItem,
   Divider,
+  IconButton,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import { useResumeStore } from "../../store/resumeStore";
@@ -19,12 +20,14 @@ import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
 const SkillsForm: React.FC = () => {
   const resume = useResumeStore((state) => state.resume);
   const addSkill = useResumeStore((state) => state.addSkill);
   const updateSkill = useResumeStore((state) => state.updateSkill);
   const deleteSkill = useResumeStore((state) => state.deleteSkill);
+  const reorderSkill = useResumeStore((state) => state.reorderSkill);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Skill>({
@@ -167,33 +170,73 @@ const SkillsForm: React.FC = () => {
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             Skills ({resume.skills.length})
           </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {resume.skills.map((skill) => (
-              <Chip
+          <Box
+            sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const from = Number(e.dataTransfer.getData("text/plain"));
+              const to = resume.skills.length - 1;
+              if (!Number.isNaN(from) && from !== to) reorderSkill(from, to);
+            }}
+          >
+            {resume.skills.map((skill, index) => (
+              <div
                 key={skill.id}
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <span>{skill.name}</span>
-                    <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                      ({skill.level})
-                    </Typography>
-                  </Box>
-                }
-                color={getLevelColor(skill.level)}
-                onDelete={() => deleteSkill(skill.id)}
-                onClick={() => handleEdit(skill)}
-                deleteIcon={<DeleteIcon />}
-                sx={{
-                  cursor: "pointer",
-                  "& .MuiChip-deleteIcon": {
-                    color: "inherit",
-                    opacity: 0.7,
-                    "&:hover": {
-                      opacity: 1,
-                    },
-                  },
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const from = Number(e.dataTransfer.getData("text/plain"));
+                  if (!Number.isNaN(from) && from !== index) {
+                    reorderSkill(from, index);
+                  }
                 }}
-              />
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  marginRight: 8,
+                  gap: 6,
+                }}
+              >
+                <IconButton
+                  size="small"
+                  aria-label="drag-handle"
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData("text/plain", String(index));
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragEnd={() => {}}
+                  sx={{ cursor: "grab", padding: 0 }}
+                >
+                  <DragIndicatorIcon fontSize="small" />
+                </IconButton>
+                <Chip
+                  key={skill.id}
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <span>{skill.name}</span>
+                      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                        ({skill.level})
+                      </Typography>
+                    </Box>
+                  }
+                  color={getLevelColor(skill.level)}
+                  onDelete={() => deleteSkill(skill.id)}
+                  onClick={() => handleEdit(skill)}
+                  deleteIcon={<DeleteIcon />}
+                  sx={{
+                    cursor: "pointer",
+                    "& .MuiChip-deleteIcon": {
+                      color: "inherit",
+                      opacity: 0.7,
+                      "&:hover": {
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                />
+              </div>
             ))}
           </Box>
         </Box>

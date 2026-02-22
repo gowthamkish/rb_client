@@ -3,12 +3,17 @@ import {
   Box,
   Container,
   Typography,
-  Tabs,
-  Tab,
   Paper,
   Grid,
   Button,
+  Stepper,
+  Step,
+  StepButton,
+  StepConnector,
+  stepConnectorClasses,
 } from "@mui/material";
+import type { StepIconProps } from "@mui/material/StepIcon";
+import { styled } from "@mui/material/styles";
 import toast from "react-hot-toast";
 import { useResumeStore } from "../../store/resumeStore";
 import PersonalInfoForm from "../../components/forms/PersonalInfoForm";
@@ -22,39 +27,86 @@ import WorkIcon from "@mui/icons-material/Work";
 import SchoolIcon from "@mui/icons-material/School";
 import BuildIcon from "@mui/icons-material/Build";
 import PaletteIcon from "@mui/icons-material/Palette";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+// ── Custom stepper connector ──────────────────────────────────────────────────
+const CustomConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 22,
+  },
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: `linear-gradient(95deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+    },
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: `linear-gradient(95deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+    },
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 3,
+    border: 0,
+    backgroundColor: theme.palette.divider,
+    borderRadius: 1,
+    transition: "background-image 0.3s ease",
+  },
+}));
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+// ── Custom step icon root ─────────────────────────────────────────────────────
+const CustomStepIconRoot = styled("div")<{
+  ownerState: { completed?: boolean; active?: boolean };
+}>(({ theme, ownerState }) => ({
+  backgroundColor: theme.palette.grey[300],
+  zIndex: 1,
+  color: "#fff",
+  width: 44,
+  height: 44,
+  display: "flex",
+  borderRadius: "50%",
+  justifyContent: "center",
+  alignItems: "center",
+  transition: "all 0.3s ease",
+  boxShadow: "none",
+  ...(ownerState.active && {
+    backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+    boxShadow: `0 4px 10px 0 ${theme.palette.primary.main}55`,
+  }),
+  ...(ownerState.completed && {
+    backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+    opacity: 0.75,
+  }),
+}));
 
+const STEP_ICONS: React.ReactElement[] = [
+  <PersonIcon />,
+  <WorkIcon />,
+  <SchoolIcon />,
+  <BuildIcon />,
+  <PaletteIcon />,
+];
+
+function CustomStepIcon(props: StepIconProps) {
+  const { active, completed, className, icon } = props;
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`builder-tabpanel-${index}`}
-      aria-labelledby={`builder-tab-${index}`}
-      {...other}
+    <CustomStepIconRoot
+      ownerState={{ completed, active }}
+      className={className}
     >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
+      {React.cloneElement(STEP_ICONS[(icon as number) - 1], {
+        sx: { fontSize: 20 },
+      })}
+    </CustomStepIconRoot>
   );
 }
 
 const ResumeBuilder: React.FC = () => {
   const resume = useResumeStore((state) => state.resume);
   const setResume = useResumeStore((state) => state.setResume);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   const [showPreview] = useState(true);
   const [dragActive, setDragActive] = useState(false);
-
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
 
   const handleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -209,12 +261,20 @@ const ResumeBuilder: React.FC = () => {
     );
   }
 
-  const tabs = [
-    { label: "Personal Info", icon: <PersonIcon /> },
-    { label: "Experience", icon: <WorkIcon /> },
-    { label: "Education", icon: <SchoolIcon /> },
-    { label: "Skills", icon: <BuildIcon /> },
-    { label: "Template", icon: <PaletteIcon /> },
+  const STEPS = [
+    "Personal Info",
+    "Experience",
+    "Education",
+    "Skills",
+    "Template",
+  ];
+
+  const STEP_PANELS = [
+    <PersonalInfoForm />,
+    <ExperienceForm />,
+    <EducationForm />,
+    <SkillsForm />,
+    <TemplateSelector />,
   ];
 
   return (
@@ -286,46 +346,90 @@ const ResumeBuilder: React.FC = () => {
           {/* Form Section */}
           <Grid size={{ xs: 12, lg: showPreview ? 6 : 12 }}>
             <Paper sx={{ p: 3 }}>
-              <Tabs
-                value={activeTab}
-                onChange={handleTabChange}
-                variant="scrollable"
-                scrollButtons="auto"
+              {/* ── Custom Horizontal Stepper ── */}
+              <Stepper
+                alternativeLabel
+                activeStep={activeStep}
+                connector={<CustomConnector />}
+                sx={{ mb: 4 }}
+              >
+                {STEPS.map((label, index) => (
+                  <Step key={label} completed={index < activeStep}>
+                    <StepButton onClick={() => setActiveStep(index)}>
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        <CustomStepIcon
+                          icon={index + 1}
+                          active={activeStep === index}
+                          completed={index < activeStep}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            mt: 0.5,
+                            fontWeight: activeStep === index ? 700 : 500,
+                            color:
+                              activeStep === index
+                                ? "primary.main"
+                                : index < activeStep
+                                  ? "primary.light"
+                                  : "text.secondary",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {label}
+                        </Typography>
+                      </Box>
+                    </StepButton>
+                  </Step>
+                ))}
+              </Stepper>
+
+              {/* ── Step content ── */}
+              <Box sx={{ py: 2, minHeight: 300 }}>
+                {STEP_PANELS[activeStep]}
+              </Box>
+
+              {/* ── Navigation buttons ── */}
+              <Box
                 sx={{
-                  borderBottom: 1,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mt: 3,
+                  pt: 2,
+                  borderTop: 1,
                   borderColor: "divider",
-                  mb: 2,
-                  "& .MuiTab-root": {
-                    minHeight: 64,
-                  },
                 }}
               >
-                {tabs.map((tab, index) => (
-                  <Tab
-                    key={index}
-                    icon={tab.icon}
-                    label={tab.label}
-                    iconPosition="start"
-                    sx={{ gap: 1 }}
-                  />
-                ))}
-              </Tabs>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowBackIcon />}
+                  disabled={activeStep === 0}
+                  onClick={() => setActiveStep((s) => s - 1)}
+                >
+                  Back
+                </Button>
 
-              <TabPanel value={activeTab} index={0}>
-                <PersonalInfoForm />
-              </TabPanel>
-              <TabPanel value={activeTab} index={1}>
-                <ExperienceForm />
-              </TabPanel>
-              <TabPanel value={activeTab} index={2}>
-                <EducationForm />
-              </TabPanel>
-              <TabPanel value={activeTab} index={3}>
-                <SkillsForm />
-              </TabPanel>
-              <TabPanel value={activeTab} index={4}>
-                <TemplateSelector />
-              </TabPanel>
+                <Typography variant="caption" color="text.secondary">
+                  Step {activeStep + 1} of {STEPS.length}
+                </Typography>
+
+                <Button
+                  variant="contained"
+                  endIcon={<ArrowForwardIcon />}
+                  disabled={activeStep === STEPS.length - 1}
+                  onClick={() => setActiveStep((s) => s + 1)}
+                >
+                  Next
+                </Button>
+              </Box>
             </Paper>
           </Grid>
         </Grid>

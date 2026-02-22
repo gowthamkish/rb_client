@@ -17,12 +17,14 @@ import { v4 as uuidv4 } from "uuid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
 const EducationForm: React.FC = () => {
   const resume = useResumeStore((state) => state.resume);
   const addEducation = useResumeStore((state) => state.addEducation);
   const updateEducation = useResumeStore((state) => state.updateEducation);
   const deleteEducation = useResumeStore((state) => state.deleteEducation);
+  const reorderEducation = useResumeStore((state) => state.reorderEducation);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Education>({
@@ -199,8 +201,19 @@ const EducationForm: React.FC = () => {
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             Education ({resume.education.length})
           </Typography>
-          {resume.education.map((edu) => (
-            <Card key={edu.id} sx={{ mb: 2 }}>
+          {resume.education.map((edu, index) => (
+            <Card
+              key={edu.id}
+              sx={{ mb: 2 }}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const from = Number(e.dataTransfer.getData("text/plain"));
+                if (!Number.isNaN(from) && from !== index) {
+                  reorderEducation(from, index);
+                }
+              }}
+            >
               <CardContent>
                 <Box
                   sx={{
@@ -226,7 +239,21 @@ const EducationForm: React.FC = () => {
                       </Typography>
                     )}
                   </Box>
-                  <Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <IconButton
+                      size="small"
+                      aria-label="drag-handle"
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/plain", String(index));
+                        e.dataTransfer.effectAllowed = "move";
+                      }}
+                      onDragEnd={() => {}}
+                      sx={{ cursor: "grab" }}
+                    >
+                      <DragIndicatorIcon />
+                    </IconButton>
+
                     <IconButton
                       size="small"
                       color="primary"
@@ -246,6 +273,16 @@ const EducationForm: React.FC = () => {
               </CardContent>
             </Card>
           ))}
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const from = Number(e.dataTransfer.getData("text/plain"));
+              const to = resume.education.length - 1;
+              if (!Number.isNaN(from) && from !== to)
+                reorderEducation(from, to);
+            }}
+          />
         </Box>
       )}
     </Box>

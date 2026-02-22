@@ -25,6 +25,7 @@ const ExperienceForm: React.FC = () => {
   const addExperience = useResumeStore((state) => state.addExperience);
   const updateExperience = useResumeStore((state) => state.updateExperience);
   const deleteExperience = useResumeStore((state) => state.deleteExperience);
+  const reorderExperience = useResumeStore((state) => state.reorderExperience);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Experience>({
@@ -208,8 +209,24 @@ const ExperienceForm: React.FC = () => {
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             Experiences ({resume.experiences.length})
           </Typography>
-          {resume.experiences.map((exp) => (
-            <Card key={exp.id} sx={{ mb: 2 }}>
+          {resume.experiences.map((exp, index) => (
+            <Card
+              key={exp.id}
+              sx={{ mb: 2 }}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData("text/plain", String(index));
+                e.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const from = Number(e.dataTransfer.getData("text/plain"));
+                if (!Number.isNaN(from) && from !== index) {
+                  reorderExperience(from, index);
+                }
+              }}
+            >
               <CardContent>
                 <Box
                   sx={{
@@ -255,6 +272,17 @@ const ExperienceForm: React.FC = () => {
               </CardContent>
             </Card>
           ))}
+          {/* allow dropping on empty space to move item to end */}
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const from = Number(e.dataTransfer.getData("text/plain"));
+              const to = resume.experiences.length - 1;
+              if (!Number.isNaN(from) && from !== to)
+                reorderExperience(from, to);
+            }}
+          />
         </Box>
       )}
     </Box>

@@ -69,15 +69,26 @@ interface ResumeStore {
   addExperience: (experience: Experience) => void;
   updateExperience: (id: string, experience: Experience) => void;
   deleteExperience: (id: string) => void;
+  reorderExperience: (from: number, to: number) => void;
   addEducation: (education: Education) => void;
   updateEducation: (id: string, education: Education) => void;
   deleteEducation: (id: string) => void;
+  reorderEducation: (from: number, to: number) => void;
   addSkill: (skill: Skill) => void;
   updateSkill: (id: string, skill: Skill) => void;
   deleteSkill: (id: string) => void;
+  reorderSkill: (from: number, to: number) => void;
   setSelectedTemplate: (template: string) => void;
   resetResume: () => void;
   setResumes: (resumes: Resume[]) => void;
+}
+
+function _reorder<T>(arr: T[], from: number, to: number) {
+  const copy = [...arr];
+  if (from < 0 || from >= copy.length || to < 0 || to >= copy.length) return copy;
+  const [item] = copy.splice(from, 1);
+  copy.splice(to, 0, item);
+  return copy;
 }
 
 const initialResume: Resume = {
@@ -164,6 +175,16 @@ export const useResumeStore = create<ResumeStore>((set) => ({
         : null,
     })),
 
+  reorderExperience: (from, to) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            experiences: _reorder(state.resume.experiences, from, to),
+          }
+        : null,
+    })),
+
   addEducation: (education) =>
     set((state) => ({
       resume: state.resume
@@ -196,6 +217,16 @@ export const useResumeStore = create<ResumeStore>((set) => ({
         : null,
     })),
 
+  reorderEducation: (from, to) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            education: _reorder(state.resume.education, from, to),
+          }
+        : null,
+    })),
+
   addSkill: (skill) =>
     set((state) => ({
       resume: state.resume
@@ -222,6 +253,16 @@ export const useResumeStore = create<ResumeStore>((set) => ({
         ? {
             ...state.resume,
             skills: state.resume.skills.filter((s) => s.id !== id),
+          }
+        : null,
+    })),
+
+  reorderSkill: (from, to) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            skills: _reorder(state.resume.skills, from, to),
           }
         : null,
     })),
