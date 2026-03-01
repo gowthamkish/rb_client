@@ -4,7 +4,9 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme/muiTheme";
 import Header from "./components/common/Header";
-import { resumeService } from "./services/api";
+import Loader from "./components/common/Loader";
+import { useLoader } from "./context/loaderContext";
+import { resumeService, setupAxiosLoader } from "./services/api";
 import LandingPage from "./pages/landing/LandingPage";
 import SignUp from "./pages/auth/SignUp";
 import Login from "./pages/auth/Login";
@@ -32,6 +34,13 @@ let _hasPrefetchedResumes = false;
 
 function App() {
   const setResume = useResumeStore((state) => state.setResume);
+  const setResumes = useResumeStore((state) => state.setResumes);
+
+  // Connect axios interceptors to the loader context
+  const { showLoader, hideLoader } = useLoader();
+  useEffect(() => {
+    setupAxiosLoader(showLoader, hideLoader);
+  }, [showLoader, hideLoader]);
 
   useEffect(() => {
     // Initialize a new resume on app load
@@ -63,21 +72,36 @@ function App() {
           const res = await resumeService.getResumes();
           const list = res.data || [];
           if (Array.isArray(list) && list.length > 0) {
-            const first = list[0];
             // Normalize server document shape to client Resume
-            const normalized = {
-              id: first._id || first.id || "",
-              title: first.title || initial.title,
-              personalInfo: first.personalInfo || initial.personalInfo,
-              experiences: first.experiences || initial.experiences,
-              education: first.education || initial.education,
-              skills: first.skills || initial.skills,
-              selectedTemplate:
-                first.selectedTemplate || initial.selectedTemplate,
-              createdAt: first.createdAt || initial.createdAt,
-              updatedAt: first.updatedAt || initial.updatedAt,
-            };
-            setResume(normalized as any);
+            const normalizedList = list.map(
+              (first: Record<string, unknown>) => {
+                const normalized = {
+                  id: (first._id as string) || (first.id as string) || "",
+                  title: (first.title as string) || initial.title,
+                  personalInfo:
+                    (first.personalInfo as typeof initial.personalInfo) ||
+                    initial.personalInfo,
+                  experiences:
+                    (first.experiences as typeof initial.experiences) ||
+                    initial.experiences,
+                  education:
+                    (first.education as typeof initial.education) ||
+                    initial.education,
+                  skills:
+                    (first.skills as typeof initial.skills) || initial.skills,
+                  selectedTemplate:
+                    (first.selectedTemplate as string) ||
+                    initial.selectedTemplate,
+                  createdAt: (first.createdAt as string) || initial.createdAt,
+                  updatedAt: (first.updatedAt as string) || initial.updatedAt,
+                };
+                return normalized;
+              },
+            );
+
+            // Populate global resumes list and set current resume to the first
+            setResumes(normalizedList);
+            setResume(normalizedList[0]);
           }
           // mark as prefetched so the effect won't re-fetch during StrictMode
           _hasPrefetchedResumes = true;
@@ -95,6 +119,7 @@ function App() {
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <BrowserRouter>
           <Toaster position="top-right" />
+          <Loader />
           <Header />
           <Routes>
             <Route path="/" element={<LandingPage />} />

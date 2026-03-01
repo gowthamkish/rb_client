@@ -54,14 +54,14 @@ const SignUp: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await authService.register(
+      await authService.register(
         formData.email,
         formData.password,
         formData.name,
       );
-      localStorage.setItem("token", response.data.token);
-      toast.success("Account created successfully!");
-      navigate("/builder");
+      toast.success("Account created successfully! Please log in.");
+      // Do not auto-login; require the user to enter credentials on the login page
+      navigate("/login");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "An error occurred");

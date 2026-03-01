@@ -14,7 +14,14 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
-import { authService } from "../../services/api";
+import { authService, resumeService } from "../../services/api";
+import { useResumeStore } from "../../store/resumeStore";
+import type {
+  Resume,
+  Experience,
+  Education,
+  Skill,
+} from "../../store/resumeStore";
 import toast from "react-hot-toast";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
@@ -51,6 +58,49 @@ const Login: React.FC = () => {
       );
       localStorage.setItem("token", response.data.token);
       toast.success("Logged in successfully!");
+      // After login, fetch resumes for the logged-in user and prefill builder
+      const setResumes = useResumeStore.getState().setResumes;
+      const setResume = useResumeStore.getState().setResume;
+      try {
+        const res = await resumeService.getResumes();
+        const list = res.data || [];
+        if (Array.isArray(list) && list.length > 0) {
+          const normalizedList = list.map(
+            (first: Record<string, unknown>): Resume => {
+              const personalInfo =
+                (first.personalInfo as Record<string, unknown>) || {};
+              return {
+                id: (first._id || first.id || "") as string,
+                title: (first.title || "New Resume") as string,
+                personalInfo: {
+                  fullName: (personalInfo.fullName || "") as string,
+                  email: (personalInfo.email || "") as string,
+                  phone: (personalInfo.phone || "") as string,
+                  location: (personalInfo.location || "") as string,
+                  professionalSummary: (personalInfo.professionalSummary ||
+                    "") as string,
+                },
+                experiences: (first.experiences || []) as Experience[],
+                education: (first.education || []) as Education[],
+                skills: (first.skills || []) as Skill[],
+                selectedTemplate: (first.selectedTemplate ||
+                  "classic") as string,
+                createdAt: (first.createdAt ||
+                  new Date().toISOString()) as string,
+                updatedAt: (first.updatedAt ||
+                  new Date().toISOString()) as string,
+              };
+            },
+          );
+
+          setResumes(normalizedList);
+          setResume(normalizedList[0]);
+        }
+      } catch (err) {
+        // Non-fatal: continue to builder even if resume fetch fails
+        console.warn("Failed to prefetch resumes after login", err);
+      }
+
       navigate("/builder");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };

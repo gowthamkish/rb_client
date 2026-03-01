@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { resumeService } from "../../services/api";
+import { useResumeStore } from "../../store/resumeStore";
 import toast from "react-hot-toast";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -42,9 +43,18 @@ const Dashboard: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
 
+  const globalResumes = useResumeStore((state) => state.resumes);
+
   useEffect(() => {
+    // If resumes are already populated in global store (prefetched by App), use them
+    if (Array.isArray(globalResumes) && globalResumes.length > 0) {
+      setResumes(globalResumes as unknown as Resume[]);
+      setLoading(false);
+      return;
+    }
+
     loadResumes();
-  }, []);
+  }, [globalResumes]);
 
   const loadResumes = async () => {
     try {
