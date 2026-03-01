@@ -14,6 +14,7 @@ import {
   useMediaQuery,
   Tooltip,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -23,7 +24,10 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useResumeStore } from "../../store/resumeStore";
+import type { Resume } from "../../store/resumeStore";
 import { resumeService } from "../../services/api";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface HeaderProps {
   onSave?: () => void;
@@ -38,6 +42,8 @@ const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isBuilderPage = location.pathname === "/builder";
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const resume = useResumeStore((s) => s.resume);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -52,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
     }
 
     const token = localStorage.getItem("token");
-    const resume = useResumeStore.getState().resume;
+    const resume = useResumeStore.getState().resume as Resume | null;
     const setResume = useResumeStore.getState().setResume;
 
     if (!resume) {
@@ -75,44 +81,103 @@ const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
     (async () => {
       try {
         if (resume.id) {
-          const res = await resumeService.updateResume(
-            resume.id,
-            resume as any,
-          );
+          const res = await resumeService.updateResume(resume.id, resume);
           const updated = res.data?.resume || res.data;
-          if (updated)
+          if (updated) {
             setResume({
-              ...(resume as any),
+              ...resume,
               id: updated._id || updated.id,
               updatedAt: updated.updatedAt || resume.updatedAt,
             });
+          }
           toast.success("Resume updated on server");
         } else {
-          const res = await resumeService.createResume(resume as any);
+          const res = await resumeService.createResume(resume);
           const created = res.data?.resume || res.data;
-          if (created)
+          if (created) {
             setResume({
-              ...(resume as any),
+              ...resume,
               id: created._id || created.id,
               createdAt: created.createdAt,
               updatedAt: created.updatedAt,
             });
+          }
           toast.success("Resume saved to server");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
+        const e = err as
+          | { response?: { data?: { message?: string } } }
+          | undefined;
         toast.error(
-          err?.response?.data?.message || "Failed to save resume to server",
+          e?.response?.data?.message || "Failed to save resume to server",
         );
       }
     })();
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (onDownloadPDF) {
       onDownloadPDF();
-    } else {
-      toast.success("Downloading resume as PDF...");
+      return;
+    }
+
+    if (!resume) {
+      toast.error("No resume to download");
+      return;
+    }
+
+    setDownloadingPDF(true);
+    try {
+      const el = document.getElementById("resume-preview");
+      if (!el) {
+        toast.error("Resume preview not found");
+        return;
+      }
+
+      const canvas = await html2canvas(el as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      const ratio = imgHeight / imgWidth;
+      const imgPdfHeight = ratio * pdfWidth;
+
+      let position = 0;
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgPdfHeight);
+
+      // If content is taller than one page, add pages
+      let heightLeft = imgPdfHeight - pdfHeight;
+      while (heightLeft > -1) {
+        position -= pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgPdfHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      const filename = `${(resume.title || "resume").replace(/\s+/g, "_")}.pdf`;
+      pdf.save(filename);
+      toast.success(`Downloaded ${filename}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate PDF");
+    } finally {
+      setDownloadingPDF(false);
     }
   };
 
@@ -236,8 +301,13 @@ const Header: React.FC<HeaderProps> = ({ onSave, onDownloadPDF }) => {
                       onClick={handleDownloadPDF}
                       color="inherit"
                       size="large"
+                      disabled={downloadingPDF}
                     >
-                      <PictureAsPdfIcon />
+                      {downloadingPDF ? (
+                        <CircularProgress size={24} color="inherit" />
+                      ) : (
+                        <PictureAsPdfIcon />
+                      )}
                     </IconButton>
                   </Tooltip>
                 </>

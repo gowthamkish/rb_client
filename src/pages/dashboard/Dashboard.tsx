@@ -98,13 +98,10 @@ const Dashboard: React.FC = () => {
     handleMenuClose();
   };
 
-  const handleDownload = async (resumeId: string, format: "pdf" | "docx") => {
-    try {
-      await resumeService.downloadResume(resumeId, format);
-      toast.success(`Resume downloaded as ${format.toUpperCase()}`);
-    } catch {
-      toast.error("Failed to download resume");
-    }
+  const handleDownload = (resumeId: string) => {
+    // Open the resume in the builder where the user can use the download button
+    navigate(`/builder?id=${resumeId}`);
+    toast("Opened builder — use the PDF icon to download", { icon: "📄" });
     handleMenuClose();
   };
 
@@ -264,7 +261,7 @@ const Dashboard: React.FC = () => {
                         startIcon={<PictureAsPdfIcon />}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDownload(resume._id, "pdf");
+                          handleDownload(resume._id);
                         }}
                       >
                         PDF
@@ -291,9 +288,7 @@ const Dashboard: React.FC = () => {
             <ListItemText>Edit</ListItemText>
           </MenuItem>
           <MenuItem
-            onClick={() =>
-              selectedResumeId && handleDownload(selectedResumeId, "pdf")
-            }
+            onClick={() => selectedResumeId && handleDownload(selectedResumeId)}
           >
             <ListItemIcon>
               <PictureAsPdfIcon fontSize="small" />
