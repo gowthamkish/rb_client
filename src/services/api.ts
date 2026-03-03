@@ -79,4 +79,16 @@ export const resumeService = {
   // downloadResume removed: PDF is generated client-side (html2canvas + jsPDF)
 };
 
+// Resume parsing service
+export const parseResumeService = {
+  parseResume: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    // Let the browser set Content-Type with the correct multipart boundary
+    return api.post("/parse-resume/", formData, {
+      headers: { "Content-Type": undefined as unknown as string },
+    });
+  },
+};
+
 export default api;

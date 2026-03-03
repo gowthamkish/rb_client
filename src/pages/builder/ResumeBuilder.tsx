@@ -10,11 +10,13 @@ import {
   StepButton,
   StepConnector,
   stepConnectorClasses,
+  CircularProgress,
 } from "@mui/material";
 import type { StepIconProps } from "@mui/material/StepIcon";
 import { styled } from "@mui/material/styles";
 import toast from "react-hot-toast";
 import { useResumeStore } from "../../store/resumeStore";
+import { parseResumeService } from "../../services/api";
 import PersonalInfoForm from "../../components/forms/PersonalInfoForm";
 import ExperienceForm from "../../components/forms/ExperienceForm";
 import EducationForm from "../../components/forms/EducationForm";
@@ -108,123 +110,108 @@ const ResumeBuilder: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [showPreview] = useState(true);
   const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const handleFiles = (files: FileList | null) => {
+  const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const file = files[0];
 
     const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext !== "pdf" && ext !== "docx" && ext !== "doc") {
+      toast.error("Unsupported file type. Please upload a .pdf, .docx, or .doc file.");
+      return;
+    }
 
-    const parseTextToResume = (text: string) => {
-      // simple heuristics: extract email, phone, and name
-      const emailMatch = text.match(
-        /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
-      );
-      const phoneMatch = text.match(/(\+?\d[\d\s\-().]{6,}\d)/);
+    setUploading(true);
+    try {
+      const response = await parseResumeService.parseResume(file);
+      const data = response.data;
 
-      const lines = text
-        .split(/\r?\n/)
-        .map((l) => l.trim())
-        .filter(Boolean);
+      // Build updated resume from parsed data
+      const personalInfo = {
+        fullName:
+          data.personalInfo?.fullName || resume?.personalInfo.fullName || "",
+        email: data.personalInfo?.email || resume?.personalInfo.email || "",
+        phone: data.personalInfo?.phone || resume?.personalInfo.phone || "",
+        location:
+          data.personalInfo?.location || resume?.personalInfo.location || "",
+        professionalSummary:
+          data.personalInfo?.professionalSummary ||
+          resume?.personalInfo.professionalSummary ||
+          "",
+      };
 
-      let fullName = "";
-      for (const line of lines.slice(0, 8)) {
-        if (emailMatch && line.includes(emailMatch[0])) continue;
-        if (phoneMatch && line.includes(phoneMatch[0])) continue;
-        if (/^[A-Za-z ,.'-]{2,}$/.test(line) && line.split(" ").length <= 4) {
-          fullName = line;
-          break;
-        }
-      }
+      const experiences =
+        Array.isArray(data.experiences) && data.experiences.length > 0
+          ? data.experiences.map((exp: Record<string, string | boolean>) => ({
+              id: exp.id || crypto.randomUUID().slice(0, 8),
+              jobTitle: exp.jobTitle || "",
+              company: exp.company || "",
+              startDate: exp.startDate || "",
+              endDate: exp.endDate || "",
+              currentlyWorking: Boolean(exp.currentlyWorking),
+              description: exp.description || "",
+            }))
+          : resume?.experiences || [];
 
-      let professionalSummary = "";
-      const summaryIndex = lines.findIndex((l) =>
-        /summary|profile|professional summary/i.test(l),
-      );
-      if (summaryIndex >= 0) {
-        professionalSummary = lines
-          .slice(summaryIndex + 1, summaryIndex + 5)
-          .join(" ");
-      }
+      const education =
+        Array.isArray(data.education) && data.education.length > 0
+          ? data.education.map((edu: Record<string, string>) => ({
+              id: edu.id || crypto.randomUUID().slice(0, 8),
+              school: edu.school || "",
+              degree: edu.degree || "",
+              fieldOfStudy: edu.fieldOfStudy || "",
+              startDate: edu.startDate || "",
+              endDate: edu.endDate || "",
+              grade: edu.grade || "",
+            }))
+          : resume?.education || [];
+
+      const skills =
+        Array.isArray(data.skills) && data.skills.length > 0
+          ? data.skills.map((skill: Record<string, string>) => ({
+              id: skill.id || crypto.randomUUID().slice(0, 8),
+              name: skill.name || "",
+              level: ([
+                "Beginner",
+                "Intermediate",
+                "Advanced",
+                "Expert",
+              ].includes(skill.level)
+                ? skill.level
+                : "Intermediate") as
+                | "Beginner"
+                | "Intermediate"
+                | "Advanced"
+                | "Expert",
+            }))
+          : resume?.skills || [];
 
       setResume({
         id: resume?.id || "",
         title: resume?.title || "Imported Resume",
-        personalInfo: {
-          fullName: fullName || resume?.personalInfo.fullName || "",
-          email: emailMatch?.[0] || resume?.personalInfo.email || "",
-          phone: phoneMatch?.[0] || resume?.personalInfo.phone || "",
-          location: resume?.personalInfo.location || "",
-          professionalSummary:
-            professionalSummary ||
-            resume?.personalInfo.professionalSummary ||
-            "",
-        },
-        experiences: resume?.experiences || [],
-        education: resume?.education || [],
-        skills: resume?.skills || [],
+        personalInfo,
+        experiences,
+        education,
+        skills,
         selectedTemplate: resume?.selectedTemplate || "classic",
         createdAt: resume?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
 
-      toast.success("Resume prefilled from uploaded file (best-effort)");
-    };
-
-    if (ext === "docx") {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const arrayBuffer = reader.result as ArrayBuffer;
-          const mammoth = await import("mammoth");
-          const result = await mammoth.convertToHtml({ arrayBuffer });
-          const text = result.value.replace(/<[^>]+>/g, "\n");
-          parseTextToResume(text);
-        } catch (err) {
-          console.error(err);
-          toast.error("Failed to parse .docx file (install mammoth)");
-        }
-      };
-      reader.onerror = () => toast.error("Failed reading file");
-      reader.readAsArrayBuffer(file);
-      return;
+      toast.success("Resume parsed and pre-filled successfully!");
+    } catch (err: unknown) {
+      console.error(err);
+      const e = err as
+        | { response?: { data?: { detail?: string } } }
+        | undefined;
+      toast.error(
+        e?.response?.data?.detail ||
+          "Failed to parse resume. Please try again.",
+      );
+    } finally {
+      setUploading(false);
     }
-
-    if (ext === "pdf") {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const arrayBuffer = reader.result as ArrayBuffer;
-          const pdfjs = await import("pdfjs-dist/legacy/build/pdf");
-          // set workerSrc to CDN using the library version
-          try {
-            pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-          } catch (e) {
-            console.warn("pdfjs worker setup failed", e);
-          }
-
-          const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
-          const doc = await loadingTask.promise;
-          let fullText = "";
-          for (let i = 1; i <= doc.numPages; i++) {
-            const page = await doc.getPage(i);
-            const content = await page.getTextContent();
-            const items = content.items as Array<{ str: string }>;
-            fullText += items.map((s) => s.str).join(" ") + "\n";
-          }
-          parseTextToResume(fullText);
-        } catch (err) {
-          console.error(err);
-          toast.error("Failed to parse PDF (install pdfjs-dist)");
-        }
-      };
-      reader.onerror = () => toast.error("Failed reading file");
-      reader.readAsArrayBuffer(file);
-      return;
-    }
-
-    // .doc (old binary) is not supported client-side reliably
-    toast.error("Unsupported file type. Please upload a .docx or .pdf file.");
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -316,13 +303,25 @@ const ResumeBuilder: React.FC = () => {
                   </Typography>
 
                   <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                    <Button variant="outlined" component="label">
-                      Upload Resume
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      disabled={uploading}
+                      startIcon={
+                        uploading ? (
+                          <CircularProgress size={18} color="inherit" />
+                        ) : undefined
+                      }
+                    >
+                      {uploading ? "Parsing…" : "Upload Resume"}
                       <input
                         hidden
-                        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
                         type="file"
-                        onChange={(e) => handleFiles(e.target.files)}
+                        onChange={(e) => {
+                          handleFiles(e.target.files);
+                          e.target.value = "";
+                        }}
                       />
                     </Button>
                   </Box>
