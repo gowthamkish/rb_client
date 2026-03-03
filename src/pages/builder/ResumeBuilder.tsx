@@ -118,7 +118,9 @@ const ResumeBuilder: React.FC = () => {
 
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext !== "pdf" && ext !== "docx" && ext !== "doc") {
-      toast.error("Unsupported file type. Please upload a .pdf, .docx, or .doc file.");
+      toast.error(
+        "Unsupported file type. Please upload a .pdf, .docx, or .doc file.",
+      );
       return;
     }
 
