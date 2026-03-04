@@ -205,6 +205,22 @@ const Login: React.FC = () => {
                 }}
               />
 
+              <Box sx={{ textAlign: "right", mt: -1, mb: 2 }}>
+                <MuiLink
+                  component={Link}
+                  to="/forgot-password"
+                  sx={{
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: "primary.main",
+                    textDecoration: "none",
+                    "&:hover": { textDecoration: "underline" },
+                  }}
+                >
+                  Forgot password?
+                </MuiLink>
+              </Box>
+
               <Button
                 type="submit"
                 fullWidth

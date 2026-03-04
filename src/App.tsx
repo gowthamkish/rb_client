@@ -10,6 +10,8 @@ import { resumeService, setupAxiosLoader } from "./services/api";
 import LandingPage from "./pages/landing/LandingPage";
 import SignUp from "./pages/auth/SignUp";
 import Login from "./pages/auth/Login";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import ResumeBuilder from "./pages/builder/ResumeBuilder";
 import Dashboard from "./pages/dashboard/Dashboard";
 import { useResumeStore } from "./store/resumeStore";
@@ -125,6 +127,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/dashboard"
               element={
