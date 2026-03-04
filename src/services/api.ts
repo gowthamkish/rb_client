@@ -95,4 +95,14 @@ export const parseResumeService = {
   },
 };
 
+// Subscription / plan services
+export const subscriptionService = {
+  /** Fetch the current user's profile (includes plan). */
+  getMe: () => api.get("/auth/me"),
+  /** Upgrade the current user to the premium plan. */
+  upgradePlan: () => api.post("/auth/upgrade-plan"),
+  /** Downgrade the current user back to the free plan. */
+  downgradePlan: () => api.post("/auth/downgrade-plan"),
+};
+
 export default api;

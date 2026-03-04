@@ -6,7 +6,12 @@ import theme from "./theme/muiTheme";
 import Header from "./components/common/Header";
 import Loader from "./components/common/Loader";
 import { useLoader } from "./context/loaderContext";
-import { resumeService, setupAxiosLoader } from "./services/api";
+import {
+  resumeService,
+  subscriptionService,
+  setupAxiosLoader,
+} from "./services/api";
+import { useUserStore } from "./store/userStore";
 import LandingPage from "./pages/landing/LandingPage";
 import SignUp from "./pages/auth/SignUp";
 import Login from "./pages/auth/Login";
@@ -37,6 +42,7 @@ let _hasPrefetchedResumes = false;
 function App() {
   const setResume = useResumeStore((state) => state.setResume);
   const setResumes = useResumeStore((state) => state.setResumes);
+  const setUser = useUserStore((state) => state.setUser);
 
   // Connect axios interceptors to the loader context
   const { showLoader, hideLoader } = useLoader();
@@ -69,6 +75,18 @@ function App() {
     // If logged in, try to fetch existing resumes from server and prefill
     const token = localStorage.getItem("token");
     if (token && !_hasPrefetchedResumes) {
+      // Load current user's profile (includes plan)
+      (async () => {
+        try {
+          const meRes = await subscriptionService.getMe();
+          if (meRes.data?.user) {
+            setUser(meRes.data.user);
+          }
+        } catch {
+          // silent fail – user store stays null; plan defaults to free in UI
+        }
+      })();
+
       (async () => {
         try {
           const res = await resumeService.getResumes();
@@ -113,7 +131,7 @@ function App() {
         }
       })();
     }
-  }, [setResume]);
+  }, [setResume, setUser]);
 
   return (
     <ThemeProvider theme={theme}>
