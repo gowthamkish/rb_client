@@ -21,6 +21,9 @@ import type {
   Experience,
   Education,
   Skill,
+  SocialLink,
+  Language,
+  Hobby,
 } from "../../store/resumeStore";
 import toast from "react-hot-toast";
 import EmailIcon from "@mui/icons-material/Email";
@@ -83,6 +86,11 @@ const Login: React.FC = () => {
                 experiences: (first.experiences || []) as Experience[],
                 education: (first.education || []) as Education[],
                 skills: (first.skills || []) as Skill[],
+                languages: (first.languages || []) as Language[],
+                socialLinks: (first.socialLinks || []) as SocialLink[],
+                certifications: (first.certifications || "") as string,
+                awards: (first.awards || "") as string,
+                hobbies: (first.hobbies || []) as Hobby[],
                 selectedTemplate: (first.selectedTemplate ||
                   "classic") as string,
                 createdAt: (first.createdAt ||
