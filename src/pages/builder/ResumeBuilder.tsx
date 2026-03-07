@@ -21,6 +21,7 @@ import PersonalInfoForm from "../../components/forms/PersonalInfoForm";
 import ExperienceForm from "../../components/forms/ExperienceForm";
 import EducationForm from "../../components/forms/EducationForm";
 import SkillsForm from "../../components/forms/SkillsForm";
+import AdditionalSectionsForm from "../../components/forms/AdditionalSectionsForm";
 import TemplateSelector from "../../components/common/TemplateSelector";
 import ResumePreview from "../../components/common/ResumePreview";
 import PersonIcon from "@mui/icons-material/Person";
@@ -28,6 +29,7 @@ import WorkIcon from "@mui/icons-material/Work";
 import SchoolIcon from "@mui/icons-material/School";
 import BuildIcon from "@mui/icons-material/Build";
 import PaletteIcon from "@mui/icons-material/Palette";
+import ExtensionIcon from "@mui/icons-material/Extension";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
@@ -89,6 +91,7 @@ const STEP_ICONS: React.ReactElement[] = [
   <WorkIcon />,
   <SchoolIcon />,
   <BuildIcon />,
+  <ExtensionIcon />,
   <PaletteIcon />,
 ];
 
@@ -189,6 +192,34 @@ const ResumeBuilder: React.FC = () => {
             }))
           : resume?.skills || [];
 
+      // ── Additional sections from parsed data ────────────────────────
+      const languages =
+        Array.isArray(data.languages) && data.languages.length > 0
+          ? data.languages.map((lang: Record<string, string>) => ({
+              id: lang.id || crypto.randomUUID().slice(0, 8),
+              name: lang.name || "",
+              level: ([
+                "Native",
+                "Fluent",
+                "Proficient",
+                "Intermediate",
+                "Basic",
+              ].includes(lang.level)
+                ? lang.level
+                : "Intermediate") as
+                | "Native"
+                | "Fluent"
+                | "Proficient"
+                | "Intermediate"
+                | "Basic",
+            }))
+          : resume?.languages || [];
+
+      const socialLinks = resume?.socialLinks || [];
+      const certifications = resume?.certifications || "";
+      const awards = resume?.awards || "";
+      const hobbies = resume?.hobbies || [];
+
       setResume({
         id: resume?.id || "",
         title: resume?.title || "Imported Resume",
@@ -196,6 +227,11 @@ const ResumeBuilder: React.FC = () => {
         experiences,
         education,
         skills,
+        languages,
+        socialLinks,
+        certifications,
+        awards,
+        hobbies,
         selectedTemplate: resume?.selectedTemplate || "classic",
         createdAt: resume?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -256,6 +292,7 @@ const ResumeBuilder: React.FC = () => {
     "Experience",
     "Education",
     "Skills",
+    "Finalize",
     "Template",
   ];
 
@@ -264,6 +301,7 @@ const ResumeBuilder: React.FC = () => {
     <ExperienceForm />,
     <EducationForm />,
     <SkillsForm />,
+    <AdditionalSectionsForm />,
     <TemplateSelector />,
   ];
 

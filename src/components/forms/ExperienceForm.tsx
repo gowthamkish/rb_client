@@ -20,6 +20,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 
+/** Format an ISO date string (e.g. "2025-01-01") to "Jan 2025" for display. */
+function formatDateDisplay(dateStr: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
+
 const ExperienceForm: React.FC = () => {
   const resume = useResumeStore((state) => state.resume);
   const addExperience = useResumeStore((state) => state.addExperience);
@@ -243,8 +251,10 @@ const ExperienceForm: React.FC = () => {
                       {exp.company}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {exp.startDate} -{" "}
-                      {exp.currentlyWorking ? "Present" : exp.endDate}
+                      {formatDateDisplay(exp.startDate)} -{" "}
+                      {exp.currentlyWorking
+                        ? "Present"
+                        : formatDateDisplay(exp.endDate)}
                     </Typography>
                     {exp.description && (
                       <Typography variant="body2" sx={{ mt: 1 }}>

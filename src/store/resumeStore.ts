@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { v4 as uuidv4 } from 'uuid';
+import { create } from "zustand";
+import { v4 as uuidv4 } from "uuid";
 
 export interface PersonalInfo {
   fullName: string;
@@ -32,7 +32,24 @@ export interface Education {
 export interface Skill {
   id: string;
   name: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+  level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
+}
+
+export interface Language {
+  id: string;
+  name: string;
+  level: "Native" | "Fluent" | "Proficient" | "Intermediate" | "Basic";
+}
+
+export interface SocialLink {
+  id: string;
+  title: string;
+  url: string;
+}
+
+export interface Hobby {
+  id: string;
+  name: string;
 }
 
 export interface Resume {
@@ -42,6 +59,11 @@ export interface Resume {
   experiences: Experience[];
   education: Education[];
   skills: Skill[];
+  languages: Language[];
+  socialLinks: SocialLink[];
+  certifications: string;
+  awards: string;
+  hobbies: Hobby[];
   selectedTemplate: string;
   templateSettings?: TemplateSettings;
   createdAt: string;
@@ -78,6 +100,17 @@ interface ResumeStore {
   updateSkill: (id: string, skill: Skill) => void;
   deleteSkill: (id: string) => void;
   reorderSkill: (from: number, to: number) => void;
+  addLanguage: (language: Language) => void;
+  updateLanguage: (id: string, language: Language) => void;
+  deleteLanguage: (id: string) => void;
+  reorderLanguage: (from: number, to: number) => void;
+  addSocialLink: (link: SocialLink) => void;
+  updateSocialLink: (id: string, link: SocialLink) => void;
+  deleteSocialLink: (id: string) => void;
+  setCertifications: (text: string) => void;
+  setAwards: (text: string) => void;
+  addHobby: (hobby: Hobby) => void;
+  deleteHobby: (id: string) => void;
   setSelectedTemplate: (template: string) => void;
   resetResume: () => void;
   setResumes: (resumes: Resume[]) => void;
@@ -85,35 +118,42 @@ interface ResumeStore {
 
 function _reorder<T>(arr: T[], from: number, to: number) {
   const copy = [...arr];
-  if (from < 0 || from >= copy.length || to < 0 || to >= copy.length) return copy;
+  if (from < 0 || from >= copy.length || to < 0 || to >= copy.length)
+    return copy;
   const [item] = copy.splice(from, 1);
   copy.splice(to, 0, item);
   return copy;
 }
 
 const initialResume: Resume = {
-  id: '',
-  title: 'New Resume',
+  id: "",
+  title: "New Resume",
   personalInfo: {
-    fullName: '',
-    email: '',
-    phone: '',
-    location: '',
-    professionalSummary: '',
+    fullName: "",
+    email: "",
+    phone: "",
+    location: "",
+    professionalSummary: "",
   },
   experiences: [],
   education: [],
   skills: [],
-  selectedTemplate: 'classic',
-  createdAt: '',
-  updatedAt: '',
+  languages: [],
+  socialLinks: [],
+  certifications: "",
+  awards: "",
+  hobbies: [],
+  selectedTemplate: "classic",
+  createdAt: "",
+  updatedAt: "",
 };
 
 export const useResumeStore = create<ResumeStore>((set) => ({
   resume: initialResume,
-  resumes: typeof window !== 'undefined' && localStorage.getItem('resumes')
-    ? JSON.parse(localStorage.getItem('resumes') || '[]')
-    : [],
+  resumes:
+    typeof window !== "undefined" && localStorage.getItem("resumes")
+      ? JSON.parse(localStorage.getItem("resumes") || "[]")
+      : [],
   previewTemplate: null,
 
   setResume: (resume) => set({ resume }),
@@ -127,12 +167,15 @@ export const useResumeStore = create<ResumeStore>((set) => ({
         createdAt: state.resume.createdAt || now,
         updatedAt: now,
       };
-      const updatedResumes = [draft, ...state.resumes.filter((r) => r.id !== draft.id)];
+      const updatedResumes = [
+        draft,
+        ...state.resumes.filter((r) => r.id !== draft.id),
+      ];
       try {
-        localStorage.setItem('resumes', JSON.stringify(updatedResumes));
+        localStorage.setItem("resumes", JSON.stringify(updatedResumes));
       } catch (err) {
         // ignore storage errors
-        console.warn('Failed to persist drafts', err);
+        console.warn("Failed to persist drafts", err);
       }
       return { resume: draft, resumes: updatedResumes } as Partial<ResumeStore>;
     }),
@@ -159,7 +202,7 @@ export const useResumeStore = create<ResumeStore>((set) => ({
         ? {
             ...state.resume,
             experiences: state.resume.experiences.map((exp) =>
-              exp.id === id ? experience : exp
+              exp.id === id ? experience : exp,
             ),
           }
         : null,
@@ -170,7 +213,9 @@ export const useResumeStore = create<ResumeStore>((set) => ({
       resume: state.resume
         ? {
             ...state.resume,
-            experiences: state.resume.experiences.filter((exp) => exp.id !== id),
+            experiences: state.resume.experiences.filter(
+              (exp) => exp.id !== id,
+            ),
           }
         : null,
     })),
@@ -201,7 +246,7 @@ export const useResumeStore = create<ResumeStore>((set) => ({
         ? {
             ...state.resume,
             education: state.resume.education.map((edu) =>
-              edu.id === id ? education : edu
+              edu.id === id ? education : edu,
             ),
           }
         : null,
@@ -267,6 +312,115 @@ export const useResumeStore = create<ResumeStore>((set) => ({
         : null,
     })),
 
+  // ── Language CRUD ───────────────────────────────────────────────────────────
+  addLanguage: (language) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            languages: [...(state.resume.languages || []), language],
+          }
+        : null,
+    })),
+
+  updateLanguage: (id, language) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            languages: (state.resume.languages || []).map((l) =>
+              l.id === id ? language : l,
+            ),
+          }
+        : null,
+    })),
+
+  deleteLanguage: (id) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            languages: (state.resume.languages || []).filter(
+              (l) => l.id !== id,
+            ),
+          }
+        : null,
+    })),
+
+  reorderLanguage: (from, to) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            languages: _reorder(state.resume.languages || [], from, to),
+          }
+        : null,
+    })),
+
+  // ── SocialLink CRUD ─────────────────────────────────────────────────────────
+  addSocialLink: (link) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            socialLinks: [...(state.resume.socialLinks || []), link],
+          }
+        : null,
+    })),
+
+  updateSocialLink: (id, link) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            socialLinks: (state.resume.socialLinks || []).map((l) =>
+              l.id === id ? link : l,
+            ),
+          }
+        : null,
+    })),
+
+  deleteSocialLink: (id) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            socialLinks: (state.resume.socialLinks || []).filter(
+              (l) => l.id !== id,
+            ),
+          }
+        : null,
+    })),
+
+  // ── Certifications & Awards ─────────────────────────────────────────────────
+  setCertifications: (text) =>
+    set((state) => ({
+      resume: state.resume ? { ...state.resume, certifications: text } : null,
+    })),
+
+  setAwards: (text) =>
+    set((state) => ({
+      resume: state.resume ? { ...state.resume, awards: text } : null,
+    })),
+
+  // ── Hobby CRUD ──────────────────────────────────────────────────────────────
+  addHobby: (hobby) =>
+    set((state) => ({
+      resume: state.resume
+        ? { ...state.resume, hobbies: [...(state.resume.hobbies || []), hobby] }
+        : null,
+    })),
+
+  deleteHobby: (id) =>
+    set((state) => ({
+      resume: state.resume
+        ? {
+            ...state.resume,
+            hobbies: (state.resume.hobbies || []).filter((h) => h.id !== id),
+          }
+        : null,
+    })),
+
   setSelectedTemplate: (template) =>
     set((state) => ({
       resume: state.resume
@@ -276,14 +430,24 @@ export const useResumeStore = create<ResumeStore>((set) => ({
 
   setTemplateSettings: (settings) =>
     set((state) => ({
-      resume: state.resume ? { ...state.resume, templateSettings: { ...(state.resume.templateSettings || {}), ...settings } } : null,
+      resume: state.resume
+        ? {
+            ...state.resume,
+            templateSettings: {
+              ...(state.resume.templateSettings || {}),
+              ...settings,
+            },
+          }
+        : null,
     })),
 
   setPreviewTemplate: (template) => set(() => ({ previewTemplate: template })),
 
   resetTemplateSettings: () =>
     set((state) => ({
-      resume: state.resume ? { ...state.resume, templateSettings: undefined } : null,
+      resume: state.resume
+        ? { ...state.resume, templateSettings: undefined }
+        : null,
     })),
 
   resetResume: () => set({ resume: initialResume }),

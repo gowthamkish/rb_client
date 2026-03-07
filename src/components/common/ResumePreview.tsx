@@ -4,6 +4,23 @@ import { useResumeStore } from "../../store/resumeStore";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import LinkIcon from "@mui/icons-material/Link";
+
+/** Format ISO date to "MMM YYYY" for preview display. */
+function fmtDate(dateStr: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
+
+/** Format ISO date to year only for education display. */
+function fmtYear(dateStr: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return String(d.getFullYear());
+}
 
 const ResumePreview: React.FC = () => {
   const resume = useResumeStore((state) => state.resume);
@@ -11,8 +28,18 @@ const ResumePreview: React.FC = () => {
 
   if (!resume) return null;
 
-  const { personalInfo, experiences, education, skills, selectedTemplate } =
-    resume;
+  const {
+    personalInfo,
+    experiences,
+    education,
+    skills,
+    languages,
+    socialLinks,
+    certifications,
+    awards,
+    hobbies,
+    selectedTemplate,
+  } = resume;
 
   // Template styles
   const templateStyles = {
@@ -241,8 +268,8 @@ const ResumePreview: React.FC = () => {
                     {exp.jobTitle}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {exp.startDate} -{" "}
-                    {exp.currentlyWorking ? "Present" : exp.endDate}
+                    {fmtDate(exp.startDate)} -{" "}
+                    {exp.currentlyWorking ? "Present" : fmtDate(exp.endDate)}
                   </Typography>
                 </Box>
                 <Typography
@@ -308,7 +335,7 @@ const ResumePreview: React.FC = () => {
                     {edu.school}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {edu.startDate} - {edu.endDate}
+                    {fmtYear(edu.startDate)} - {fmtYear(edu.endDate)}
                   </Typography>
                 </Box>
                 <Typography
@@ -334,7 +361,7 @@ const ResumePreview: React.FC = () => {
 
         {/* Skills */}
         {skills.length > 0 && (
-          <Box>
+          <Box sx={{ mb: 4 }}>
             <Typography
               variant="h6"
               sx={{
@@ -371,6 +398,215 @@ const ResumePreview: React.FC = () => {
                         : currentStyle.accentColor,
                     border:
                       selectedTemplate === "ats" ? "1px solid #ccc" : "none",
+                    fontWeight: 500,
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Languages */}
+        {(languages || []).length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                color: currentStyle.sectionTitleColor,
+                mb: 1,
+                borderBottom:
+                  selectedTemplate === "ats" ? "2px solid #000" : "none",
+                pb: 0.5,
+              }}
+            >
+              Languages
+            </Typography>
+            <Divider
+              sx={{
+                mb: 2,
+                display: selectedTemplate === "ats" ? "none" : "block",
+              }}
+            />
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {(languages || []).map((lang) => (
+                <Chip
+                  key={lang.id}
+                  label={`${lang.name} — ${lang.level}`}
+                  size="small"
+                  sx={{
+                    bgcolor:
+                      selectedTemplate === "ats"
+                        ? "transparent"
+                        : `${currentStyle.accentColor}15`,
+                    color:
+                      selectedTemplate === "ats"
+                        ? "text.primary"
+                        : currentStyle.accentColor,
+                    border:
+                      selectedTemplate === "ats" ? "1px solid #ccc" : "none",
+                    fontWeight: 500,
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Websites & Social Media */}
+        {(socialLinks || []).length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                color: currentStyle.sectionTitleColor,
+                mb: 1,
+                borderBottom:
+                  selectedTemplate === "ats" ? "2px solid #000" : "none",
+                pb: 0.5,
+              }}
+            >
+              Links
+            </Typography>
+            <Divider
+              sx={{
+                mb: 2,
+                display: selectedTemplate === "ats" ? "none" : "block",
+              }}
+            />
+            {(socialLinks || []).map((link) => (
+              <Box
+                key={link.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
+              >
+                <LinkIcon
+                  sx={{ fontSize: 16, color: currentStyle.accentColor }}
+                />
+                <Typography variant="body2" fontWeight={500}>
+                  {link.title}:
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {link.url}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {/* Certifications */}
+        {certifications && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                color: currentStyle.sectionTitleColor,
+                mb: 1,
+                borderBottom:
+                  selectedTemplate === "ats" ? "2px solid #000" : "none",
+                pb: 0.5,
+              }}
+            >
+              Certifications
+            </Typography>
+            <Divider
+              sx={{
+                mb: 2,
+                display: selectedTemplate === "ats" ? "none" : "block",
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                lineHeight: 1.8,
+                color: "text.secondary",
+                whiteSpace: "pre-line",
+              }}
+            >
+              {certifications}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Awards & Honors */}
+        {awards && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                color: currentStyle.sectionTitleColor,
+                mb: 1,
+                borderBottom:
+                  selectedTemplate === "ats" ? "2px solid #000" : "none",
+                pb: 0.5,
+              }}
+            >
+              Awards & Honors
+            </Typography>
+            <Divider
+              sx={{
+                mb: 2,
+                display: selectedTemplate === "ats" ? "none" : "block",
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                lineHeight: 1.8,
+                color: "text.secondary",
+                whiteSpace: "pre-line",
+              }}
+            >
+              {awards}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Hobbies & Interests */}
+        {(hobbies || []).length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                color: currentStyle.sectionTitleColor,
+                mb: 1,
+                borderBottom:
+                  selectedTemplate === "ats" ? "2px solid #000" : "none",
+                pb: 0.5,
+              }}
+            >
+              Hobbies & Interests
+            </Typography>
+            <Divider
+              sx={{
+                mb: 2,
+                display: selectedTemplate === "ats" ? "none" : "block",
+              }}
+            />
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {(hobbies || []).map((hobby) => (
+                <Chip
+                  key={hobby.id}
+                  label={hobby.name}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderColor:
+                      selectedTemplate === "ats"
+                        ? "#ccc"
+                        : currentStyle.accentColor,
+                    color:
+                      selectedTemplate === "ats"
+                        ? "text.primary"
+                        : currentStyle.accentColor,
                     fontWeight: 500,
                   }}
                 />

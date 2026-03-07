@@ -19,6 +19,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
+/** Format an ISO date string (e.g. "2007-01-01") to "2007" (year only) for education display. */
+function formatEduDateDisplay(dateStr: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return String(d.getFullYear());
+}
+
 const EducationForm: React.FC = () => {
   const resume = useResumeStore((state) => state.resume);
   const addEducation = useResumeStore((state) => state.addEducation);
@@ -231,7 +239,8 @@ const EducationForm: React.FC = () => {
                       {edu.fieldOfStudy && ` in ${edu.fieldOfStudy}`}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {edu.startDate} - {edu.endDate}
+                      {formatEduDateDisplay(edu.startDate)} -{" "}
+                      {formatEduDateDisplay(edu.endDate)}
                     </Typography>
                     {edu.grade && (
                       <Typography variant="body2" sx={{ mt: 1 }}>

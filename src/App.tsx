@@ -65,6 +65,11 @@ function App() {
       experiences: [],
       education: [],
       skills: [],
+      languages: [],
+      socialLinks: [],
+      certifications: "",
+      awards: "",
+      hobbies: [],
       selectedTemplate: "classic",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -109,6 +114,18 @@ function App() {
                     initial.education,
                   skills:
                     (first.skills as typeof initial.skills) || initial.skills,
+                  languages:
+                    (first.languages as typeof initial.languages) ||
+                    initial.languages,
+                  socialLinks:
+                    (first.socialLinks as typeof initial.socialLinks) ||
+                    initial.socialLinks,
+                  certifications:
+                    (first.certifications as string) || initial.certifications,
+                  awards: (first.awards as string) || initial.awards,
+                  hobbies:
+                    (first.hobbies as typeof initial.hobbies) ||
+                    initial.hobbies,
                   selectedTemplate:
                     (first.selectedTemplate as string) ||
                     initial.selectedTemplate,
